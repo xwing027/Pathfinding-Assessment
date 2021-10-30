@@ -10,9 +10,12 @@ public class Waypoints : MonoBehaviour
     public GameObject[] goal;
     public GameObject currentGoal;
     public int goalIndex;
+    
     public Transform target;
     NavMeshAgent agent;
     Vector3 destination;
+
+    public GameObject objects;
     
     Collection collection;
 
@@ -36,13 +39,20 @@ public class Waypoints : MonoBehaviour
         {
             return; //if not moving, exit function
         }
-        if (isAIMoving)
+        if (objects == null)
         {
-            Find(currentGoal, speed); //if moving, go into find state
+            if (isAIMoving)
+            {
+                Wander(currentGoal, speed); //if moving, go into wander state
+            }
+        }
+        else
+        {
+            Find(objects, speed); //otherwise, find the objects
         }
     }
 
-    void Find(GameObject goal, float currentSpeed)
+    void Wander(GameObject goal, float currentSpeed)
     {
         Vector3 direction = (goal.transform.position - transform.position).normalized; //finds direction to the goal
         Vector3 position = transform.position;
@@ -56,6 +66,10 @@ public class Waypoints : MonoBehaviour
         {
             NextGoal(); //go to the next goal
         }
+        if (distance > 5f)
+        {
+            Find(objects,speed);
+        }
     }
 
     public void NextGoal()
@@ -67,5 +81,16 @@ public class Waypoints : MonoBehaviour
         {
             return; //exit function
         } 
+    }
+
+    void Find(GameObject objects, float currentSpeed)
+    {
+        target = objects.gameObject.transform;
+
+        Vector2 direction = (objects.transform.position - transform.position).normalized; //finds the direction to the objects
+        Vector2 position = transform.position;
+
+        destination = target.position; //sets the destination to the target's position
+        agent.destination = target.position; //moves the agent towards the target
     }
 }
