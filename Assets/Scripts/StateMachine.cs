@@ -6,6 +6,7 @@ public enum State
 {
     Wander,
     Find,
+    Collect,
 }
 
 public class StateMachine : MonoBehaviour
@@ -13,12 +14,17 @@ public class StateMachine : MonoBehaviour
     public State state;
     public float findDistance = 5f;
 
-    private Waypoints waypoints = null;
+    public Waypoints waypoints;
     private GameObject objects;
+
+    public Transform closestObject;
+    public float objectDistance;
+    public float collectRange;
 
     private void Start()
     {
-        state = State.Wander;    
+        waypoints = GetComponent<Waypoints>();
+        NextState();   
     }
 
     private IEnumerator WanderState()
@@ -27,31 +33,38 @@ public class StateMachine : MonoBehaviour
         
         while (state == State.Wander)
         {
-            float distance = Vector3.Distance(transform.position, objects.transform.position); //finds distance to object
-            if (distance <findDistance)
+            closestObject = null;
+            objectDistance = 100;
+            collectRange = 5;
+            //search through all items in colObjects
+            foreach (var item in waypoints.colObjects)
             {
-                state = State.Find;
+                //check how far that object is
+                float distance2 = Vector3.Distance(item.transform.position, transform.position);
+                //if we dont have an object or this item is closer than the last item 
+                if (closestObject == null || distance2 < objectDistance)
+                {
+                    //set as new item
+                    closestObject = item;
+                    objectDistance = waypoints.distance;
+                }
+            }
+            if (objectDistance <= collectRange)
+            {
+                state = State.Collect;
             }
             yield return null;
         }
         NextState();
     }
 
-    private IEnumerator FindState()
+    private IEnumerator CollectState()
     {
-        while (state == State.Find)
-        {
-            //object becomes target
-            float distance = Vector3.Distance(transform.position, objects.transform.position);
-            
-            if (distance <waypoints.speed *Time.deltaTime)
-            {
-                state = State.Wander;
-            }
+        waypoints.target = closestObject;
 
-            yield return null;
-        }
-        NextState();
+        waypoints.destination = waypoints.target.position; //sets the destination to the target's position
+        waypoints.agent.destination = waypoints.target.position; //moves the agent towards the target
+        yield return null;
     }
 
     void NextState()
@@ -61,8 +74,8 @@ public class StateMachine : MonoBehaviour
             case State.Wander:
                 StartCoroutine(WanderState());
                 break;
-            case State.Find:
-                StartCoroutine(FindState());
+            case State.Collect:
+                StartCoroutine(CollectState());
                 break;
             default:
                 break;

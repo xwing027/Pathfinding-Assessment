@@ -10,14 +10,13 @@ public class Waypoints : MonoBehaviour
     public GameObject[] goal;
     public GameObject currentGoal;
     public int goalIndex;
+    public float distance;
 
-    private List<Transform> colObjects;
+    public List<Transform> colObjects;
     
     public Transform target;
-    NavMeshAgent agent;
-    Vector3 destination;
-
-    public GameObject objects;
+    public NavMeshAgent agent;
+    public Vector3 destination;
     
     Collection collection;
 
@@ -55,13 +54,14 @@ public class Waypoints : MonoBehaviour
         {
             return; //if not moving, exit function
         }
-        if (objects != null)
+        if (colObjects == null) //if there are no collection objects
         {
             if (isAIMoving)
             {
                 Wander(currentGoal, speed); //if moving, go into wander state
             }
         }
+
     }
 
     void Wander(GameObject goal, float currentSpeed)
@@ -70,21 +70,22 @@ public class Waypoints : MonoBehaviour
         Vector3 direction = (goal.transform.position - transform.position).normalized; //finds direction to the goal
         Vector3 position = transform.position;
 
-        float distance = Vector3.Distance(transform.position, goal.transform.position); //finds distance to the goal
+        distance = Vector3.Distance(transform.position, goal.transform.position); //finds distance to the goal
 
         destination = target.position; //sets the destination to the target's position
         agent.destination = target.position; //moves the agent towards the target
-        
-        if (distance < 0.5f || collection.colUnlock) //if close to object, or the door has been unlocked
+
+        Debug.Log(distance);
+        if (distance < 0.8f || collection.colUnlock) //if close to object, or the door has been unlocked
         {
             NextGoal(); //go to the next goal
         }
         #endregion
 
         #region Object Finding
-        closestObject = null;
+        /* closestObject = null;
         objectDistance = 100;
-        collectRange = 10;
+        collectRange = 5;
         //search through all items in colObjects
         foreach (var item in colObjects)
         {
@@ -101,27 +102,15 @@ public class Waypoints : MonoBehaviour
         if (objectDistance <= collectRange)
         {
             Collect();
-        }
+        }*/
         #endregion
-    }
-
-    void Collect()
-    {
-        target = closestObject;
-        /* target = objects.gameObject.transform;
-
-         Vector2 direction = (objects.transform.position - transform.position).normalized; //finds the direction to the objects
-         Vector2 position = transform.position;*/
-
-        destination = target.position; //sets the destination to the target's position
-        agent.destination = target.position; //moves the agent towards the target
-
     }
 
     public void NextGoal()
     {
         goalIndex++; //increase the index, moving to the next goal in the array
         currentGoal = goal[goalIndex]; //sets current goal to the new goal
+        Debug.Log("Next Goal");
 
         if (goalIndex > goal.Length - 1) //if a the end of the array
         {

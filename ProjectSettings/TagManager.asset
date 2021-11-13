@@ -10,6 +10,7 @@ TagManager:
   - Coin Door
   - Key1 Door
   - Key2 Door
+  - Waypoint
   layers:
   - Default
   - TransparentFX

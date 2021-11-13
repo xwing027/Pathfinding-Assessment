@@ -15,11 +15,16 @@ public class Collection : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
+        if (other.gameObject.CompareTag("Waypoint"))
+        {
+            //Destroy(other.gameObject, 0.9f);
+        }
+
         #region Collecting
         if (other.gameObject.CompareTag("Coin"))
         {
             coinCount++;
-            Destroy(other.gameObject, 0.5f);
+            //Destroy(other.gameObject, 0.5f);
         }
         if (other.gameObject.CompareTag("Key1"))
         {
