@@ -11,6 +11,7 @@ TagManager:
   - Key1 Door
   - Key2 Door
   - Waypoint
+  - RWP
   layers:
   - Default
   - TransparentFX

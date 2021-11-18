@@ -5,7 +5,6 @@ using UnityEngine;
 public class Collection : MonoBehaviour
 {
     public GameObject doors;
-    public Waypoints waypoints;
 
     public int coinCount; //these check if the agent has collected enough items to unlock the door
     public int key1Count;
@@ -15,16 +14,12 @@ public class Collection : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Waypoint"))
-        {
-            //Destroy(other.gameObject, 0.9f);
-        }
-
         #region Collecting
+        //depending on what item is being collected, add to the relevant counter and then destroy the gameobject
         if (other.gameObject.CompareTag("Coin"))
         {
             coinCount++;
-            //Destroy(other.gameObject, 0.5f);
+            Destroy(other.gameObject, 1f);
         }
         if (other.gameObject.CompareTag("Key1"))
         {
@@ -39,9 +34,10 @@ public class Collection : MonoBehaviour
         #endregion
 
         #region Unlocking
+        //depending on the door type, unlock if the count is the correct number
         if (other.gameObject.CompareTag("Coin Door"))
         {
-            if (coinCount ==5)
+            if (coinCount ==4)
             {
                 doors.GetComponent<SlidingDoors>()._isLocked = false;
                 colUnlock = true;
@@ -64,21 +60,5 @@ public class Collection : MonoBehaviour
             }
         }
         #endregion
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.CompareTag("Coin Door"))
-        {
-            doors.GetComponent<SlidingDoors>()._isLocked = true;
-        }
-        if (other.gameObject.CompareTag("Key1 Door"))
-        {
-            doors.GetComponent<SlidingDoors>()._isLocked = true;
-        }
-        if (other.gameObject.CompareTag("Key2 Door"))
-        {
-            doors.GetComponent<SlidingDoors>()._isLocked = true;
-        }
     }
 }

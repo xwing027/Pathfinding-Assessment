@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Waypoints : MonoBehaviour
+public class WaypointsR : MonoBehaviour
 {
     #region Variables
     public float speed = 10f;
     public GameObject[] goal;
-    public GameObject currentGoal;
+    public static GameObject currentGoal;
     public int goalIndex;
     public float distance;
+    public State state;
 
-    public List<Transform> colObjects;
+    public static List<Transform> colObjects;
     
-    public Transform target;
+    public static Transform target;
     public NavMeshAgent agent;
     public Vector3 destination;
     
@@ -27,46 +28,56 @@ public class Waypoints : MonoBehaviour
     float collectRange;
     #endregion
 
-    void Start()
+    void Awake()
     {
-        GameObject[] temp = GameObject.FindGameObjectsWithTag("Coin");
-        colObjects = new List<Transform>();
-        for (int i = 0; i < temp.Length; i++)
-        {
-            if (temp.Length >=0)
-            {
-                colObjects.Add(temp[i].GetComponent<Transform>());
-            }          
-        }
-        //Debug.Log(colObjects[0]);
-        //colObjects.RemoveAt(0);
         currentGoal = goal[goalIndex]; //sets the current goal to be the next in the array
-        
-        agent = gameObject.GetComponent<NavMeshAgent>();
-        collection = GetComponent<Collection>();     
+        target = currentGoal.gameObject.transform; //sets the destination target to the current goal
     }
 
+    void Start()
+    {
+        GetObjects();
+
+        
+        Debug.Log(currentGoal+" R");
+        
+        agent = gameObject.GetComponent<NavMeshAgent>(); 
+        collection = GetComponent<Collection>();
+        
+    }
+    public static void GetObjects()
+    {
+        GameObject[] temp = GameObject.FindGameObjectsWithTag("Key1");
+        colObjects = new List<Transform>();
+
+        for (int i = 0; i < temp.Length; i++)
+        {
+            if (temp.Length >= 0)
+            {
+                colObjects.Add(temp[i].GetComponent<Transform>());
+            }
+        }
+    }
     void Update()
     {
-        target = currentGoal.gameObject.transform; //sets the destination target to the current goal
+      // target = currentGoal.gameObject.transform; //sets the destination target to the current goal
+
 
         if (isAIMoving == false)
         {
+            Debug.Log("return");
             return; //if not moving, exit function
         }
-        if (colObjects == null) //if there are no collection objects
-        {
             if (isAIMoving)
             {
-                Wander(currentGoal, speed); //if moving, go into wander state
+                Debug.Log("Wander");
+                Wander(currentGoal, speed);
             }
-        }
-
     }
+
 
     void Wander(GameObject goal, float currentSpeed)
     {
-        #region Waypoint Movement
         Vector3 direction = (goal.transform.position - transform.position).normalized; //finds direction to the goal
         Vector3 position = transform.position;
 
@@ -75,35 +86,11 @@ public class Waypoints : MonoBehaviour
         destination = target.position; //sets the destination to the target's position
         agent.destination = target.position; //moves the agent towards the target
 
-        Debug.Log(distance);
-        if (distance < 0.8f || collection.colUnlock) //if close to object, or the door has been unlocked
+        if (distance < 2f || collection.colUnlock) //if close to object, or the door has been unlocked
         {
+            Debug.Log("NextR");
             NextGoal(); //go to the next goal
         }
-        #endregion
-
-        #region Object Finding
-        /* closestObject = null;
-        objectDistance = 100;
-        collectRange = 5;
-        //search through all items in colObjects
-        foreach (var item in colObjects)
-        {
-            //check how far that object is
-            float distance2 = Vector3.Distance(item.transform.position, transform.position);
-            //if we dont have an object or this item is closer than the last item 
-            if (closestObject == null || distance2 < objectDistance)
-            {
-                //set as new item
-                closestObject = item;
-                objectDistance = distance;
-            }
-        }
-        if (objectDistance <= collectRange)
-        {
-            Collect();
-        }*/
-        #endregion
     }
 
     public void NextGoal()
